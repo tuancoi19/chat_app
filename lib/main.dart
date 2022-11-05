@@ -1,6 +1,6 @@
 import 'package:chat_app/app_cubit.dart';
 import 'package:chat_app/ui/personal_chat/personal_chat_screen.dart';
-import 'package:chat_app/ui/test.dart';
+import 'package:chat_app/ui/personal_chat/components/test.dart';
 import 'package:chat_app/ui/walkthrough_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

@@ -1,4 +1,4 @@
-import 'package:chat_app/functions/database_functions.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_app/ui/personal_chat/personal_chat_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +15,29 @@ class PersonalChatCubit extends Cubit<PersonalChatState> {
 
   void changeRoom({required Room room}) {
     emit(state.copyWith(room: room));
+  }
+
+  Future<void> setAudio(AudioPlayer audioPlayer, String url) async {
+    audioPlayer.setSourceUrl(url);
+  }
+
+  Future<void> setDefaultDuration() async {
+    emit(state.copyWith(
+      duration: Duration.zero,
+      position: Duration.zero,
+    ));
+  }
+
+  void changeDuration(Duration newDuration) {
+    emit(state.copyWith(
+      duration: newDuration,
+    ));
+  }
+
+  void changePosition(Duration newPosition) {
+    emit(state.copyWith(
+      position: newPosition,
+    ));
   }
 
   void changeMessages({required List<Message> messages}) {
