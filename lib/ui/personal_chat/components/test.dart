@@ -1,4 +1,5 @@
 import 'package:chat_app/models/entities/messages.dart';
+import 'package:chat_app/ui/personal_chat/components/audio_content.dart';
 import 'package:chat_app/ui/view/image_view.dart';
 import 'package:chat_app/ui/view/video_view.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../commons/app_commons.dart';
+import '../../../commons/app_commons.dart';
 
 Widget itemMessage(
     Message message, String me, String guestName, BuildContext context) {
@@ -100,16 +101,10 @@ content(Message message, String me, BuildContext context) {
             ])),
       );
     case 'Audio':
-      return Container(
-          width: 139,
-          height: 37,
-          color: const Color.fromRGBO(55, 95, 255, 1),
-          padding: const EdgeInsets.all(8),
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Icon(Icons.play_arrow, color: Colors.white),
-            SvgPicture.asset('assets/images/sound.svg', color: Colors.white)
-          ]));
+      return AudioConTents(
+        message: message,
+        me: me,
+      );
   }
 }
 

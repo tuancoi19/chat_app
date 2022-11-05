@@ -5,12 +5,12 @@ import 'package:chat_app/functions/upload.dart';
 import 'package:chat_app/models/entities/users.dart';
 import 'package:chat_app/ui/personal_chat/personal_chat_cubit.dart';
 import 'package:chat_app/ui/personal_chat/personal_chat_state.dart';
-import 'package:chat_app/ui/test.dart';
+import 'package:chat_app/ui/personal_chat/components/test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:audioplayers/audioplayers.dart';
 import '../../commons/app_commons.dart';
 import '../../functions/database_functions.dart';
 import '../../functions/show_picker.dart';
@@ -30,6 +30,8 @@ class _PersonalChatScreen extends State<PersonalChatScreen> {
   late PersonalChatCubit cubit;
   late AppCubit appCubit;
   late Room data;
+  final audioPlayer = AudioPlayer();
+  bool isPlaying = false;
 
   @override
   void initState() {
@@ -37,6 +39,17 @@ class _PersonalChatScreen extends State<PersonalChatScreen> {
     isDisable = true;
     appCubit = BlocProvider.of<AppCubit>(context);
     cubit = BlocProvider.of<PersonalChatCubit>(context);
+    audioPlayer.onPlayerStateChanged.listen((state) {
+      setState(() {
+        //tạo hàm trong cubit
+        isPlaying = state == PlayerState.playing;
+      });
+    });
+    audioPlayer.onDurationChanged.listen((newDuration) {
+      setState(() {
+        //tạo hàm trong cubit
+      });
+    });
     cubit.changeName(
         name: '${widget.guest.name.firstName} ${widget.guest.name.lastName}');
     getRoom(widget.guest.phoneNumber, appCubit.state.userNumber!);
