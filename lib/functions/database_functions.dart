@@ -129,7 +129,7 @@ class DatabaseFunctions {
 
   sendAttachmentMessage(
       String author, String attachURL, String attachType, Room room,
-      {String? replyID, String? thumbnailURL}) async {
+      {String? replyID, String? thumbnailURL, String? attachName}) async {
     Message message = Message(
         createdTime: Timestamp.now(),
         messageID: 'message${getRandomString(12)}',
@@ -139,7 +139,8 @@ class DatabaseFunctions {
         status: Status.Sent.name,
         attachType: attachType,
         attachURL: attachURL,
-        thumbnailURL: thumbnailURL);
+        thumbnailURL: thumbnailURL,
+        attachName: attachName);
     await db
         .collection('room')
         .where('roomID', isEqualTo: room.roomID)
@@ -155,5 +156,22 @@ class DatabaseFunctions {
               toFirestore: (value, options) => value.toFirestore())
           .update({'updatedTime': Timestamp.now()});
     });
+  }
+
+  Future<Message?> getMessageByID(String ID, Room room) async {
+    Message? data;
+    await db
+        .collection('room')
+        .where('roomID', isEqualTo: room.roomID)
+        .get()
+        .then((value) async => await value.docs.single.reference
+            .collection('listMessages')
+            .where('messageID', isEqualTo: ID)
+            .withConverter(
+                fromFirestore: Message.fromFirestore,
+                toFirestore: (value, options) => value.toFirestore())
+            .get()
+            .then((value) => data = value.docs.single.data()));
+    return data;
   }
 }

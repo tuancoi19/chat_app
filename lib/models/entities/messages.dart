@@ -5,6 +5,7 @@ class Message {
   final String? content;
   final String messageID;
   final String author;
+  final String? attachName;
   final String? attachURL;
   final String? attachType;
   final String status;
@@ -22,7 +23,8 @@ class Message {
       required this.status,
       this.replyID,
       this.isDisable = false,
-      this.thumbnailURL});
+      this.thumbnailURL,
+      this.attachName});
 
   factory Message.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot,
       SnapshotOptions? options) {
@@ -37,7 +39,8 @@ class Message {
         status: data?['status'],
         replyID: data?['replyID'],
         isDisable: data?['isDisable'],
-        thumbnailURL: data?['thumbnailURL']);
+        thumbnailURL: data?['thumbnailURL'],
+        attachName: data?['attachName']);
   }
 
   Map<String, dynamic> toFirestore() {
@@ -51,7 +54,8 @@ class Message {
       'status': status,
       if (replyID != null) 'replyID': replyID else 'replyID': '',
       'isDisable': isDisable,
-      'thumbnailURL': thumbnailURL
+      'thumbnailURL': thumbnailURL,
+      if (attachType != null) 'attachName': attachName else 'attachName': ''
     };
   }
 }

@@ -60,3 +60,13 @@ Future uploadAudio(File data) async {
   final url = await storage.getDownloadURL();
   return url;
 }
+
+Future uploadFile(File data) async {
+  final name = basename(data.path);
+  final path = 'file/$name';
+  final storage = FirebaseStorage.instance.ref().child(path);
+
+  await storage.putFile(data);
+  final url = await storage.getDownloadURL();
+  return {'name': name, 'path': url};
+}

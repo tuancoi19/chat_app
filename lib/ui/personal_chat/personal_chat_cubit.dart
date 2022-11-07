@@ -21,6 +21,14 @@ class PersonalChatCubit extends Cubit<PersonalChatState> {
     emit(state.copyWith(messages: messages));
   }
 
+  void changeisReply({required bool isReply}) {
+    emit(state.copyWith(isReply: isReply));
+  }
+
+  void changeReplyMessage({required Message? replyMessage}) {
+    emit(state.copyWith(replyMessage: replyMessage));
+  }
+
   void getMessages(Room data) {
     FirebaseFirestore.instance
         .collection('room')
