@@ -1,8 +1,6 @@
 import 'package:chat_app/app_cubit.dart';
-import 'package:chat_app/ui/home/home_screen.dart';
 import 'package:chat_app/ui/verification/verification_cubit.dart';
 import 'package:chat_app/ui/verification/verification_screen_1.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';

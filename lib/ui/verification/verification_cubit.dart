@@ -5,12 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../functions/database_functions.dart';
 import '../../functions/show_toast.dart';
-import '../../repositories/auth_repository.dart';
-import '../home/home_screen.dart';
-import '../profile_account/profile_account_cubit.dart';
-import '../profile_account/profile_account_screen.dart';
 
 class SignInCubit extends Cubit<SignInState> {
   final FirebaseAuth fireBaseAuth = FirebaseAuth.instance;

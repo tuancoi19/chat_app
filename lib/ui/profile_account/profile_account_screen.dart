@@ -67,6 +67,8 @@ class _ProfileAccountScreen extends State<ProfileAccountScreen> {
                           replacement: const SizedBox(),
                           child: IconButton(
                               onPressed: () {
+                                firstNode.unfocus();
+                                lastNode.unfocus();
                                 Navigator.pop(context);
                               },
                               icon: const Icon(Icons.navigate_before))),
@@ -88,7 +90,7 @@ class _ProfileAccountScreen extends State<ProfileAccountScreen> {
                     child: Stack(children: [
                       ClipRRect(
                           borderRadius: BorderRadius.circular(50),
-                          child: state.avatar == null
+                          child: state.avatar == null || state.avatar!.isEmpty
                               ? Image.asset('assets/images/Avatar.png',
                                   height: 100, width: 100, fit: BoxFit.cover)
                               : Image.network(state.avatar!,
@@ -139,12 +141,15 @@ class _ProfileAccountScreen extends State<ProfileAccountScreen> {
                                   'Please do not use Number and Special character in this field!');
                               FocusScope.of(context).requestFocus(firstNode);
                             } else {
-                              firstNameController.text = value;
+                              cubit.changeFirstName(firstname: value);
                               FocusScope.of(context).requestFocus(lastNode);
                             }
                           }
                         },
-                        controller: firstNameController,
+                        onEditingComplete: () => cubit.changeFirstName(
+                            firstname: firstNameController.text),
+                        controller: firstNameController
+                          ..text = state.firstName ?? '',
                         decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: 'First Name (Required)',
@@ -167,10 +172,11 @@ class _ProfileAccountScreen extends State<ProfileAccountScreen> {
                                 'Please do not use Number and Special character in this field!');
                             FocusScope.of(context).requestFocus(lastNode);
                           } else {
-                            lastNameController.text = value;
+                            cubit.changeLastName(lastname: value);
                           }
                         },
-                        controller: lastNameController,
+                        controller: lastNameController
+                          ..text = state.lastName ?? '',
                         decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: 'Last Name (Optional)',
@@ -194,24 +200,18 @@ class _ProfileAccountScreen extends State<ProfileAccountScreen> {
                               'Please do not use Number and Special character in this field!');
                         } else {
                           if (widget.isInSetting == true) {
-                            if (state.firstName != firstNameController.text) {
-                              await DatabaseFunctions().updateUserProfile(
-                                  'firstName',
-                                  firstNameController.text,
-                                  appCubit.state.user!.phoneNumber!);
-                            }
-                            if (state.lastName != lastNameController.text) {
-                              await DatabaseFunctions().updateUserProfile(
-                                  'lastName',
-                                  lastNameController.text,
-                                  appCubit.state.user!.phoneNumber!);
-                            }
-                            if (isChangeAvatar == true) {
-                              await DatabaseFunctions().updateUserProfile(
-                                  'avatarURL',
-                                  state.avatar,
-                                  appCubit.state.user!.phoneNumber!);
-                            }
+                            await DatabaseFunctions().updateUserProfile(
+                                'name.firstName',
+                                firstNameController.text,
+                                appCubit.state.user!.phoneNumber!);
+                            await DatabaseFunctions().updateUserProfile(
+                                'name.lastName',
+                                lastNameController.text,
+                                appCubit.state.user!.phoneNumber!);
+                            await DatabaseFunctions().updateUserProfile(
+                                'name.avatarURL',
+                                state.avatar,
+                                appCubit.state.user!.phoneNumber!);
                             Future.delayed(
                                 Duration.zero, () => Navigator.pop(context));
                           } else {
@@ -228,6 +228,8 @@ class _ProfileAccountScreen extends State<ProfileAccountScreen> {
                                         builder: (context) =>
                                             const HomeScreen(pageIndex: 0))));
                           }
+                          firstNode.unfocus();
+                          lastNode.unfocus();
                         }
                       }
                     },

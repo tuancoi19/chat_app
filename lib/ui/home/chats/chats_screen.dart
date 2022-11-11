@@ -1,20 +1,16 @@
 import 'package:chat_app/app_cubit.dart';
 import 'package:chat_app/commons/app_commons.dart';
 import 'package:chat_app/functions/database_functions.dart';
-import 'package:chat_app/models/entities/messages.dart';
 import 'package:chat_app/models/entities/users.dart';
 import 'package:chat_app/ui/home/chats/chats_cubit.dart';
 import 'package:chat_app/ui/home/chats/chats_state.dart';
 import 'package:chat_app/ui/home/chats/widget/item_chat.dart';
 import 'package:chat_app/ui/home/chats/widget/item_chat_cubit.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-import 'package:intl/intl.dart';
 
-import '../../../models/entities/rooms.dart';
 import '../../personal_chat/personal_chat_cubit.dart';
 import '../../personal_chat/personal_chat_screen.dart';
 

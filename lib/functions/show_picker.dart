@@ -40,14 +40,20 @@ chooseAttachment(BuildContext context) {
             title: Text('Image', style: TextStyle(color: textColor)),
             onTap: () async {
               var source = await chooseSource(context);
-              Navigator.of(context).pop({'type': 'Image', 'source': source});
+              Future.delayed(
+                  Duration.zero,
+                  () => Navigator.of(context)
+                      .pop({'type': 'Image', 'source': source}));
             }),
         ListTile(
             leading: const Icon(Icons.video_file),
             title: Text('Video', style: TextStyle(color: textColor)),
             onTap: () async {
               var source = await chooseSource(context);
-              Navigator.of(context).pop({'type': 'Video', 'source': source});
+              Future.delayed(
+                  Duration.zero,
+                  () => Navigator.of(context)
+                      .pop({'type': 'Video', 'source': source}));
             }),
         ListTile(
             leading: const Icon(Icons.audio_file),
