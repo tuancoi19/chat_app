@@ -1,4 +1,3 @@
-import 'package:chat_app/functions/database_functions.dart';
 import 'package:chat_app/functions/show_toast.dart';
 import 'package:chat_app/models/entities/messages.dart';
 import 'package:chat_app/ui/personal_chat/personal_chat_cubit.dart';
@@ -7,6 +6,7 @@ import 'package:chat_app/ui/personal_chat/widget/view/image_view.dart';
 import 'package:chat_app/ui/personal_chat/widget/view/video_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:swipe_to/swipe_to.dart';
@@ -21,31 +21,42 @@ Widget itemMessage(
     String guestName,
     BuildContext context,
     FocusNode focusNode,
-    PersonalChatCubit cubit,
-    Room room) {
+    Room room,
+    String phoneNumber,
+    int index,
+    List<Message>? messages) {
+  PersonalChatCubit cubit = BlocProvider.of<PersonalChatCubit>(context);
   if (message.author != me) {
     return SwipeTo(
         onRightSwipe: () {
-          cubit.changeReplyMessage(replyMessage: message);
           cubit.changeisReply(isReply: true);
+          cubit.changeReplyMessage(replyMessage: message);
           focusNode.requestFocus();
         },
-        iconColor: text_color,
-        child: guestMessage(message, me, guestName, context, room));
+        iconColor: textColor,
+        child: guestMessage(
+            message, me, guestName, context, room, cubit, phoneNumber));
   } else {
     return SwipeTo(
         onLeftSwipe: () {
-          cubit.changeReplyMessage(replyMessage: message);
           cubit.changeisReply(isReply: true);
+          cubit.changeReplyMessage(replyMessage: message);
           focusNode.requestFocus();
         },
-        iconColor: text_color,
-        child: youMessage(message, me, guestName, context, room));
+        iconColor: textColor,
+        child: youMessage(
+            message, me, guestName, context, room, cubit, phoneNumber));
   }
 }
 
-Widget youMessage(Message message, String me, String guestName,
-    BuildContext context, Room room) {
+Widget youMessage(
+    Message message,
+    String me,
+    String guestName,
+    BuildContext context,
+    Room room,
+    PersonalChatCubit cubit,
+    String phoneNumber) {
   return Container(
       margin: const EdgeInsets.only(right: 16, left: 22, bottom: 12),
       alignment: Alignment.bottomRight,
@@ -58,38 +69,50 @@ Widget youMessage(Message message, String me, String guestName,
               bottomLeft: Radius.circular(16)),
           color: Color.fromRGBO(0, 45, 227, 1),
         ),
-        child: Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              message.replyID!.isEmpty
-                  ? const SizedBox()
-                  : Container(
-                      margin: const EdgeInsets.only(bottom: 4),
-                      decoration: BoxDecoration(
-                        color: const Color.fromRGBO(237, 237, 237, 1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: replyForm(
-                          message.replyID!, me, guestName, room, true)!),
-              content(message, me, context),
-              Container(
-                  margin: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '${DateFormat('hh.mm').format(DateTime.fromMicrosecondsSinceEpoch(message.createdTime.microsecondsSinceEpoch))} · ${message.status}',
-                    style: GoogleFonts.lato(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white),
-                  ))
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            message.replyID!.isEmpty
+                ? const SizedBox()
+                : Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    child: ClipPath(
+                        clipper: const ShapeBorderClipper(
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(4)))),
+                        child: Container(
+                            decoration: const BoxDecoration(
+                                color: Color.fromRGBO(237, 237, 237, 1),
+                                border: Border(
+                                    left: BorderSide(
+                                        color: Colors.white, width: 4))),
+                            child: replyForm(message.replyID!, me, guestName,
+                                room, true, cubit, phoneNumber)!)),
+                  ),
+            content(message, me, context),
+            Container(
+                margin: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '${DateFormat('hh.mm').format(DateTime.fromMicrosecondsSinceEpoch(message.createdTime.microsecondsSinceEpoch))} · ${message.status}',
+                  style: GoogleFonts.lato(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white),
+                ))
+          ],
         ),
       ));
 }
 
-Widget guestMessage(Message message, String me, String guestName,
-    BuildContext context, Room room) {
+Widget guestMessage(
+    Message message,
+    String me,
+    String guestName,
+    BuildContext context,
+    Room room,
+    PersonalChatCubit cubit,
+    String phoneNumber) {
   return Container(
       margin: const EdgeInsets.only(left: 16, right: 22, bottom: 12),
       alignment: Alignment.bottomLeft,
@@ -102,30 +125,38 @@ Widget guestMessage(Message message, String me, String guestName,
               bottomRight: Radius.circular(16)),
           color: Colors.white,
         ),
-        child: Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              message.replyID!.isEmpty
-                  ? const SizedBox()
-                  : Container(
-                      margin: const EdgeInsets.only(bottom: 4),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: const Color.fromRGBO(237, 237, 237, 1)),
-                      child: replyForm(
-                          message.replyID!, me, guestName, room, false)!),
-              content(message, me, context),
-              Container(
-                  margin: const EdgeInsets.only(top: 4),
-                  child: Text(
-                      DateFormat('hh.mm').format(
-                          DateTime.fromMicrosecondsSinceEpoch(
-                              message.createdTime.microsecondsSinceEpoch)),
-                      style: GoogleFonts.lato(
-                          fontSize: 10, fontWeight: FontWeight.w400)))
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            message.replyID!.isEmpty
+                ? const SizedBox()
+                : Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    child: ClipPath(
+                        clipper: const ShapeBorderClipper(
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(4)))),
+                        child: Container(
+                            decoration: const BoxDecoration(
+                                color: Color.fromRGBO(237, 237, 237, 1),
+                                border: Border(
+                                    left: BorderSide(
+                                        color: Color.fromRGBO(0, 45, 227, 1),
+                                        width: 4))),
+                            child: replyForm(message.replyID!, me, guestName,
+                                room, false, cubit, phoneNumber)!)),
+                  ),
+            content(message, me, context),
+            Container(
+                margin: const EdgeInsets.only(top: 4),
+                child: Text(
+                    DateFormat('hh.mm').format(
+                        DateTime.fromMicrosecondsSinceEpoch(
+                            message.createdTime.microsecondsSinceEpoch)),
+                    style: GoogleFonts.lato(
+                        fontSize: 10, fontWeight: FontWeight.w400)))
+          ],
         ),
       ));
 }
@@ -186,7 +217,7 @@ Widget content(Message message, String me, BuildContext context) {
                         decoration: TextDecoration.underline,
                         fontWeight: FontWeight.w400,
                         fontSize: 14,
-                        color: text_color),
+                        color: textColor),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () => launchUrl(Uri.parse(message.attachURL!)))
               ]),
@@ -211,63 +242,49 @@ Widget content(Message message, String me, BuildContext context) {
   return const SizedBox();
 }
 
-Widget? replyForm(
-    String replyID, String me, String guestName, Room room, bool youSide) {
-  return FutureBuilder(
-      future: DatabaseFunctions().getMessageByID(replyID, room),
-      builder: (context, AsyncSnapshot<Message?> snapshot) {
-        if (snapshot.hasData) {
-          return Container(
-            decoration: BoxDecoration(
-                border: Border(
-                    left: BorderSide(
-                        width: 4,
-                        color: youSide == false
-                            ? const Color.fromRGBO(0, 45, 227, 1)
-                            : Colors.white),
-                    right: const BorderSide(
-                        width: 4, color: Color.fromRGBO(237, 237, 237, 1)))),
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(snapshot.data!.author != me ? guestName : 'You',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 10,
-                        color: Color.fromRGBO(0, 45, 227, 1))),
-                Container(
-                    margin: const EdgeInsets.only(top: 4),
-                    child: snapshot.data!.attachType == ''
-                        ? Text(
-                            snapshot.data?.content ?? "",
+Widget? replyForm(String replyID, String me, String guestName, Room room,
+    bool youSide, PersonalChatCubit cubit, String phoneNumber) {
+  Message result = cubit.state.messages!
+      .where((element) => element.messageID.contains(replyID))
+      .single;
+  return Container(
+    padding: const EdgeInsets.all(8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(result.author != me ? guestName : 'You',
+            style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+                color: Color.fromRGBO(0, 45, 227, 1))),
+        Container(
+            margin: const EdgeInsets.only(top: 4),
+            child: result.attachType == ''
+                ? Text(
+                    result.content ?? "",
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: textColor),
+                  )
+                : RichText(
+                    text: TextSpan(
+                      children: [
+                        WidgetSpan(
+                            child: Icon(Icons.attach_file,
+                                color: textColor, size: 14)),
+                        TextSpan(
+                            text: ' Reply an attachment',
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
-                                color: text_color),
-                          )
-                        : RichText(
-                            text: TextSpan(
-                              children: [
-                                WidgetSpan(
-                                    child: Icon(Icons.attach_file,
-                                        color: text_color, size: 14)),
-                                TextSpan(
-                                    text: ' Reply an attachment',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                        color: text_color))
-                              ],
-                            ),
-                          ))
-              ],
-            ),
-          );
-        } else {
-          return const SizedBox();
-        }
-      });
+                                color: textColor))
+                      ],
+                    ),
+                  ))
+      ],
+    ),
+  );
 }
 
 Widget replyChatForm(Message message, String me, String guestName) {
@@ -295,20 +312,20 @@ Widget replyChatForm(Message message, String me, String guestName) {
                           style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: text_color),
+                              color: textColor),
                         )
                       : RichText(
                           text: TextSpan(
                             children: [
                               WidgetSpan(
                                   child: Icon(Icons.attach_file,
-                                      color: text_color)),
+                                      color: textColor)),
                               TextSpan(
                                   text: ' Reply an attachment',
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
-                                      color: text_color))
+                                      color: textColor))
                             ],
                           ),
                         ))
@@ -321,7 +338,7 @@ Future downloadDialog(BuildContext context, Message message) async {
       context: context,
       builder: ((context) => AlertDialog(
             title: const Text('Downloading'),
-            content: Text('Are you sure to download ${message.attachName}?'),
+            content: Text('Do you want to download ${message.attachName}?'),
             actions: [
               TextButton(
                   onPressed: () async {

@@ -44,7 +44,7 @@ class _VerificationScreen1 extends State<VerificationScreen1> {
                     style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 24,
-                        color: text_color)),
+                        color: textColor)),
                 Container(
                   margin: const EdgeInsets.only(top: 8),
                   child: Text(
@@ -52,7 +52,7 @@ class _VerificationScreen1 extends State<VerificationScreen1> {
                       style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: text_color),
+                          color: textColor),
                       textAlign: TextAlign.center),
                 )
               ]),
@@ -70,7 +70,7 @@ class _VerificationScreen1 extends State<VerificationScreen1> {
                         height: 36,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
-                            color: box_color),
+                            color: boxColor),
                         child: Container(
                             margin: const EdgeInsets.only(left: 8, right: 8),
                             child: Row(
@@ -92,7 +92,7 @@ class _VerificationScreen1 extends State<VerificationScreen1> {
                                     style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14,
-                                        color: disable_text_color))
+                                        color: disableTextColor))
                               ],
                             ))),
                   ),
@@ -103,17 +103,18 @@ class _VerificationScreen1 extends State<VerificationScreen1> {
                           height: 36,
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
-                              color: box_color),
+                              color: boxColor),
                           child: TextField(
                             style: const TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 14),
                             textInputAction: TextInputAction.done,
                             keyboardType: TextInputType.phone,
+                            autofocus: true,
                             decoration: InputDecoration(
                                 border: InputBorder.none,
                                 hintText: 'Phone number',
                                 hintStyle: TextStyle(
-                                    color: disable_text_color,
+                                    color: disableTextColor,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14)),
                             onChanged: (value) {
@@ -144,7 +145,7 @@ class _VerificationScreen1 extends State<VerificationScreen1> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: button_color,
+                    backgroundColor: buttonColor,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30))),
                 child: const Text('Continue',

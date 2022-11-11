@@ -21,7 +21,7 @@ class DatabaseFunctions {
         .get()
         .then((querySnapshot) {
       if (querySnapshot.docs.isNotEmpty) {
-        data = querySnapshot.docs[0].data();
+        data = querySnapshot.docs.single.data();
       }
     });
     return data;
@@ -58,16 +58,15 @@ class DatabaseFunctions {
   }
 
   updateUserProfile(String field, data, String phoneNumber) async {
-    QuerySnapshot snapshot = await db
+    await db
         .collection('userchat')
         .where('phoneNumber', isEqualTo: phoneNumber)
         .withConverter(
             fromFirestore: UserChat.fromFirestore,
             toFirestore: (value, options) => value.toFirestore())
-        .get();
-    if (snapshot.docs.isNotEmpty) {
-      snapshot.docs.first.reference.update({field: data});
-    }
+        .get()
+        .then((value) async =>
+            await value.docs.single.reference.update({field: data}));
   }
 
   checkRoom(String member1, String member2) async {
@@ -96,7 +95,8 @@ class DatabaseFunctions {
     Room room = Room(
         roomID: 'room${getRandomString(12)}',
         updatedTime: Timestamp.now(),
-        listMembers: [member1, member2]);
+        listMembers: [member1, member2],
+        haveMessage: false);
     await db.collection('room').doc().set(room.toFirestore());
     return room;
   }
@@ -109,7 +109,7 @@ class DatabaseFunctions {
         content: content,
         author: author,
         replyID: replyID,
-        status: Status.Sent.name);
+        status: Status.sent.name);
     await db
         .collection('room')
         .where('roomID', isEqualTo: room.roomID)
@@ -123,7 +123,7 @@ class DatabaseFunctions {
           .withConverter(
               fromFirestore: Room.fromFirestore,
               toFirestore: (value, options) => value.toFirestore())
-          .update({'updatedTime': Timestamp.now()});
+          .update({'updatedTime': Timestamp.now(), 'haveMessage': true});
     });
   }
 
@@ -136,7 +136,7 @@ class DatabaseFunctions {
         content: '',
         author: author,
         replyID: replyID,
-        status: Status.Sent.name,
+        status: Status.sent.name,
         attachType: attachType,
         attachURL: attachURL,
         thumbnailURL: thumbnailURL,
@@ -154,24 +154,20 @@ class DatabaseFunctions {
           .withConverter(
               fromFirestore: Room.fromFirestore,
               toFirestore: (value, options) => value.toFirestore())
-          .update({'updatedTime': Timestamp.now()});
+          .update({'updatedTime': Timestamp.now(), 'haveMessage': true});
     });
   }
 
-  Future<Message?> getMessageByID(String ID, Room room) async {
-    Message? data;
+  getAllRoom(String number) async {
+    List<Room>? data;
     await db
         .collection('room')
-        .where('roomID', isEqualTo: room.roomID)
+        .where('listMembers', arrayContains: number)
+        .withConverter(
+            fromFirestore: Room.fromFirestore,
+            toFirestore: (value, options) => value.toFirestore())
         .get()
-        .then((value) async => await value.docs.single.reference
-            .collection('listMessages')
-            .where('messageID', isEqualTo: ID)
-            .withConverter(
-                fromFirestore: Message.fromFirestore,
-                toFirestore: (value, options) => value.toFirestore())
-            .get()
-            .then((value) => data = value.docs.single.data()));
+        .then((value) => data = value.docs.map((e) => e.data()).toList());
     return data;
   }
 }

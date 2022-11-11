@@ -25,10 +25,10 @@ class ProfileAccountScreen extends StatefulWidget {
 }
 
 class _ProfileAccountScreen extends State<ProfileAccountScreen> {
-  FocusNode firstNode = FocusNode();
-  FocusNode lastNode = FocusNode();
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
+  late FocusNode firstNode;
+  late FocusNode lastNode;
+  late TextEditingController firstNameController;
+  late TextEditingController lastNameController;
   late ProfileAccountCubit cubit;
   late AppCubit appCubit;
   final regExp = RegExp(r'[^(a-zA-Z)+(\s)+(a-zA-Z)$]');
@@ -37,191 +37,210 @@ class _ProfileAccountScreen extends State<ProfileAccountScreen> {
   @override
   void initState() {
     super.initState();
+    firstNode = FocusNode();
+    lastNode = FocusNode();
     cubit = BlocProvider.of<ProfileAccountCubit>(context);
     appCubit = BlocProvider.of<AppCubit>(context);
-    cubit.getData(appCubit.state.userNumber!);
     isChangeAvatar = false;
+    cubit.getData(appCubit.state.user!.phoneNumber!);
+    lastNameController = TextEditingController();
+    firstNameController = TextEditingController();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileAccountCubit, ProfileAccountState>(
-        bloc: cubit,
-        builder: ((context, state) => Scaffold(
-                body: Column(children: [
-              Container(
-                margin: const EdgeInsets.only(top: 47, left: 16, right: 16),
-                child: Row(
-                  children: [
-                    Visibility(
-                        visible: widget.isInSetting,
-                        replacement: const SizedBox(),
-                        child: IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: const Icon(Icons.navigate_before))),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text('Your Profile',
-                          style: TextStyle(
-                              color: text_color,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18)),
-                    )
-                  ],
+    return GestureDetector(
+      onTap: () {
+        firstNode.unfocus();
+        lastNode.unfocus();
+      },
+      child: BlocBuilder<ProfileAccountCubit, ProfileAccountState>(
+          bloc: cubit,
+          builder: ((context, state) => Scaffold(
+                  body: Column(children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 47, left: 16, right: 16),
+                  child: Row(
+                    children: [
+                      Visibility(
+                          visible: widget.isInSetting,
+                          replacement: const SizedBox(),
+                          child: IconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(Icons.navigate_before))),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text('Your Profile',
+                            style: TextStyle(
+                                color: textColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18)),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                  margin: const EdgeInsets.only(top: 46),
-                  height: 100,
-                  width: 100,
-                  child: Stack(children: [
-                    state.avatar == null
-                        ? ClipOval(
-                            child: Image.asset('assets/images/Avatar.png',
-                                height: 100, width: 100, fit: BoxFit.cover))
-                        : ClipOval(
-                            child: Image.network(state.avatar!,
-                                height: 100, width: 100, fit: BoxFit.cover)),
-                    Container(
-                        margin: const EdgeInsets.only(
-                            top: 68, left: 68, bottom: 1, right: 1),
-                        child: IconButton(
-                            icon: const Icon(Icons.add_circle, size: 24),
-                            onPressed: () async {
-                              ImageSource? source;
-                              XFile? image;
-                              String? croppedFile;
-                              source = await chooseSource(context);
-                              if (source != null) {
-                                image = await showImagePicker(source);
-                                if (image != null) {
-                                  croppedFile =
-                                      await cropImage(File(image.path));
-                                  if (croppedFile != null) {
-                                    cubit.changeAvatar(
-                                        avatar: await uploadAvatar(
-                                            appCubit.state.userNumber!,
-                                            croppedFile));
-                                    isChangeAvatar = true;
+                Container(
+                    margin: const EdgeInsets.only(top: 46),
+                    height: 100,
+                    width: 100,
+                    child: Stack(children: [
+                      ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child: state.avatar == null
+                              ? Image.asset('assets/images/Avatar.png',
+                                  height: 100, width: 100, fit: BoxFit.cover)
+                              : Image.network(state.avatar!,
+                                  height: 100, width: 100, fit: BoxFit.cover)),
+                      Container(
+                          margin: const EdgeInsets.only(
+                              top: 68, left: 68, bottom: 1, right: 1),
+                          child: IconButton(
+                              icon: const Icon(Icons.add_circle, size: 24),
+                              onPressed: () async {
+                                ImageSource? source;
+                                XFile? image;
+                                String? croppedFile;
+                                source = await chooseSource(context);
+                                if (source != null) {
+                                  image = await showImagePicker(source);
+                                  if (image != null) {
+                                    croppedFile =
+                                        await cropImage(File(image.path));
+                                    if (croppedFile != null) {
+                                      cubit.changeAvatar(
+                                          avatar: await uploadAvatar(
+                                              appCubit.state.user!.phoneNumber!,
+                                              croppedFile));
+                                      isChangeAvatar = true;
+                                    }
                                   }
                                 }
-                              }
-                            }))
-                  ])),
-              Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4), color: box_color),
-                  margin: const EdgeInsets.only(top: 31, left: 24, right: 24),
-                  child: TextField(
-                      textCapitalization: TextCapitalization.sentences,
-                      focusNode: firstNode,
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (value) {
-                        if (value.isEmpty) {
-                          showStatusToast('Please enter your First Name!');
-                          FocusScope.of(context).requestFocus(firstNode);
-                        } else {
+                              }))
+                    ])),
+                Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: boxColor),
+                    margin: const EdgeInsets.only(top: 31, left: 24, right: 24),
+                    child: TextField(
+                        maxLines: 1,
+                        textCapitalization: TextCapitalization.sentences,
+                        focusNode: firstNode,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (value) {
+                          if (value.isEmpty) {
+                            showStatusToast('Please enter your First Name!');
+                            FocusScope.of(context).requestFocus(firstNode);
+                          } else {
+                            if (regExp.hasMatch(value)) {
+                              showStatusToast(
+                                  'Please do not use Number and Special character in this field!');
+                              FocusScope.of(context).requestFocus(firstNode);
+                            } else {
+                              firstNameController.text = value;
+                              FocusScope.of(context).requestFocus(lastNode);
+                            }
+                          }
+                        },
+                        controller: firstNameController,
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'First Name (Required)',
+                            hintStyle: TextStyle(
+                                color: disableTextColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14)))),
+                Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: boxColor),
+                    margin: const EdgeInsets.only(top: 12, left: 24, right: 24),
+                    child: TextField(
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.done,
+                        focusNode: lastNode,
+                        onSubmitted: (value) {
                           if (regExp.hasMatch(value)) {
                             showStatusToast(
                                 'Please do not use Number and Special character in this field!');
-                            FocusScope.of(context).requestFocus(firstNode);
-                          } else {
                             FocusScope.of(context).requestFocus(lastNode);
+                          } else {
+                            lastNameController.text = value;
                           }
-                        }
-                      },
-                      controller: firstNameController
-                        ..text = state.firstName ?? '',
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'First Name (Required)',
-                          hintStyle: TextStyle(
-                              color: disable_text_color,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14)))),
-              Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4), color: box_color),
-                  margin: const EdgeInsets.only(top: 12, left: 24, right: 24),
-                  child: TextField(
-                      textCapitalization: TextCapitalization.sentences,
-                      textInputAction: TextInputAction.done,
-                      focusNode: lastNode,
-                      onSubmitted: (value) {
-                        if (regExp.hasMatch(value)) {
+                        },
+                        controller: lastNameController,
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Last Name (Optional)',
+                            hintStyle: TextStyle(
+                                color: disableTextColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14)))),
+                Container(
+                  width: 327,
+                  height: 52,
+                  margin: const EdgeInsets.only(top: 68),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (firstNameController.text.isEmpty) {
+                        showStatusToast(
+                            'Please do not leave the required fields empty!');
+                      } else {
+                        if (regExp.hasMatch(firstNameController.text) ||
+                            regExp.hasMatch(lastNameController.text)) {
                           showStatusToast(
                               'Please do not use Number and Special character in this field!');
-                          FocusScope.of(context).requestFocus(lastNode);
-                        }
-                      },
-                      controller: lastNameController
-                        ..text = state.lastName ?? '',
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Last Name (Optional)',
-                          hintStyle: TextStyle(
-                              color: disable_text_color,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14)))),
-              Container(
-                width: 327,
-                height: 52,
-                margin: const EdgeInsets.only(top: 68),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (firstNameController.text.isEmpty) {
-                      showStatusToast(
-                          'Please do not leave the required fields empty!');
-                    } else {
-                      if (regExp.hasMatch(firstNameController.text) ||
-                          regExp.hasMatch(lastNameController.text)) {
-                        showStatusToast(
-                            'Please do not use Number and Special character in this field!');
-                      } else {
-                        if (widget.isInSetting == true) {
-                          if (state.firstName != firstNameController.text) {
-                            DatabaseFunctions().updateUserProfile(
-                                'firstName',
-                                firstNameController.text,
-                                appCubit.state.userNumber!);
-                          }
-                          if (state.lastName != lastNameController.text) {
-                            DatabaseFunctions().updateUserProfile(
-                                'lastName',
-                                lastNameController.text,
-                                appCubit.state.userNumber!);
-                          }
-                          if (isChangeAvatar == true) {
-                            DatabaseFunctions().updateUserProfile('avatarURL',
-                                state.avatar, appCubit.state.userNumber!);
-                          }
-                          Navigator.pop(context);
                         } else {
-                          DatabaseFunctions().addUserProfile(
-                              firstNameController.text,
-                              lastNameController.text,
-                              state.avatar,
-                              appCubit.state.userNumber!);
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const HomeScreen(pageIndex: 0)));
+                          if (widget.isInSetting == true) {
+                            if (state.firstName != firstNameController.text) {
+                              await DatabaseFunctions().updateUserProfile(
+                                  'firstName',
+                                  firstNameController.text,
+                                  appCubit.state.user!.phoneNumber!);
+                            }
+                            if (state.lastName != lastNameController.text) {
+                              await DatabaseFunctions().updateUserProfile(
+                                  'lastName',
+                                  lastNameController.text,
+                                  appCubit.state.user!.phoneNumber!);
+                            }
+                            if (isChangeAvatar == true) {
+                              await DatabaseFunctions().updateUserProfile(
+                                  'avatarURL',
+                                  state.avatar,
+                                  appCubit.state.user!.phoneNumber!);
+                            }
+                            Future.delayed(
+                                Duration.zero, () => Navigator.pop(context));
+                          } else {
+                            await DatabaseFunctions().addUserProfile(
+                                firstNameController.text,
+                                lastNameController.text,
+                                state.avatar,
+                                appCubit.state.user!.phoneNumber!);
+                            Future.delayed(
+                                Duration.zero,
+                                () => Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const HomeScreen(pageIndex: 0))));
+                          }
                         }
                       }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: button_color,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30))),
-                  child: const Text('Save',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                ),
-              )
-            ]))));
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: buttonColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30))),
+                    child: const Text('Save',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 16)),
+                  ),
+                )
+              ])))),
+    );
   }
 }

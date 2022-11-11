@@ -1,1 +1,1 @@
-enum Status { Sent, Read }
+enum Status { sent, read }

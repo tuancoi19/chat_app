@@ -1,4 +1,3 @@
-import 'package:chat_app/repositories/auth_repository.dart';
 import 'package:chat_app/ui/verification/verification_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,9 +41,7 @@ class _VerificationScreen2 extends State<VerificationScreen2> {
         child: Column(children: [
           Text('Enter Code',
               style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 24,
-                  color: text_color)),
+                  fontWeight: FontWeight.w700, fontSize: 24, color: textColor)),
           Container(
             margin: const EdgeInsets.only(top: 8),
             child: Text(
@@ -52,7 +49,7 @@ class _VerificationScreen2 extends State<VerificationScreen2> {
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: text_color),
+                    color: textColor),
                 textAlign: TextAlign.center),
           ),
           Container(
@@ -62,7 +59,7 @@ class _VerificationScreen2 extends State<VerificationScreen2> {
                 appContext: context,
                 length: 6,
                 pastedTextStyle: TextStyle(
-                    color: text_color,
+                    color: textColor,
                     fontWeight: FontWeight.w700,
                     fontSize: 32),
                 keyboardType: TextInputType.number,

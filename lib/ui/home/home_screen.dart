@@ -2,10 +2,13 @@ import 'package:chat_app/commons/app_commons.dart';
 import 'package:chat_app/ui/home/chats/chats_screen.dart';
 import 'package:chat_app/ui/home/contacts/contacts_cubit.dart';
 import 'package:chat_app/ui/home/contacts/contacts_screen.dart';
+import 'package:chat_app/ui/home/more/more_cubit.dart';
 import 'package:chat_app/ui/home/more/more_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_clipped_nav_bar/sliding_clipped_nav_bar.dart';
+
+import 'chats/chats_cubit.dart';
 
 class HomeScreen extends StatefulWidget {
   final int pageIndex;
@@ -34,8 +37,10 @@ class _HomeScreen extends State<HomeScreen> {
           BlocProvider(
               create: (context) => ContactsCubit(),
               child: const ContactsScreen()),
-          const ChatsScreen(),
-          const MoreScreen()
+          BlocProvider(
+              create: (context) => ChatsCubit(), child: const ChatsScreen()),
+          BlocProvider(
+              create: (context) => MoreCubit(), child: const MoreScreen())
         ]),
         bottomNavigationBar: SlidingClippedNavBar(
           backgroundColor: Theme.of(context).primaryColor,
@@ -44,8 +49,8 @@ class _HomeScreen extends State<HomeScreen> {
             BarItem(icon: Icons.chat_bubble_outline, title: 'Chats'),
             BarItem(icon: Icons.more_horiz, title: 'More')
           ],
-          activeColor: text_color,
-          inactiveColor: text_color,
+          activeColor: textColor,
+          inactiveColor: textColor,
           onButtonPressed: (int index) {
             setState(() {
               selectedIndex = index;

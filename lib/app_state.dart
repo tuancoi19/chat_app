@@ -1,14 +1,15 @@
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppState extends Equatable {
-  final String? userNumber;
+  final User? user;
 
-  const AppState({this.userNumber});
+  const AppState({this.user});
 
   @override
-  List<Object?> get props => [userNumber];
+  List<Object?> get props => [user];
 
-  AppState copyWith({String? userNumber}) {
-    return AppState(userNumber: userNumber ?? this.userNumber);
+  AppState copyWith({User? user}) {
+    return AppState(user: user ?? this.user);
   }
 }

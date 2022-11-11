@@ -1,11 +1,7 @@
-import 'package:chat_app/app_cubit.dart';
 import 'package:chat_app/functions/format_time.dart';
 import 'package:chat_app/models/entities/messages.dart';
-import 'package:chat_app/ui/personal_chat/personal_chat_cubit.dart';
-import 'package:chat_app/ui/personal_chat/personal_chat_state.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
 class AudioConTents extends StatefulWidget {
@@ -30,16 +26,20 @@ class _AudioConTentsState extends State<AudioConTents> {
     setAudio(audioPlayer, widget.message.attachURL ?? '');
 
     audioPlayer.onPlayerStateChanged.listen((state) {
-      setState(() {
-        isInit = false;
-        isPlaying = state == PlayerState.playing;
-      });
+      if (mounted) {
+        setState(() {
+          isInit = false;
+          isPlaying = state == PlayerState.playing;
+        });
+      }
     });
 
     audioPlayer.onDurationChanged.listen((newDuration) {
-      setState(() {
-        duration = newDuration;
-      });
+      if (mounted) {
+        setState(() {
+          duration = newDuration;
+        });
+      }
     });
 
     audioPlayer.onPlayerComplete.listen((event) {
@@ -47,9 +47,11 @@ class _AudioConTentsState extends State<AudioConTents> {
     });
 
     audioPlayer.onPositionChanged.listen((newPosition) {
-      setState(() {
-        position = newPosition;
-      });
+      if (mounted) {
+        setState(() {
+          position = newPosition;
+        });
+      }
     });
   }
 

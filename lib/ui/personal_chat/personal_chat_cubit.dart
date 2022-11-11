@@ -1,4 +1,5 @@
 import 'package:chat_app/functions/database_functions.dart';
+import 'package:chat_app/models/enums/load_status.dart';
 import 'package:chat_app/ui/personal_chat/personal_chat_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,20 +30,48 @@ class PersonalChatCubit extends Cubit<PersonalChatState> {
     emit(state.copyWith(replyMessage: replyMessage));
   }
 
-  void getMessages(Room data) {
+  Future<void> fetchMessages(String guest, String me) async {
+    emit(state.copyWith(fetchDataStatus: LoadStatus.loading));
+    try {
+      Room data = await DatabaseFunctions().checkRoom(guest, me);
+      changeRoom(room: data);
+      FirebaseFirestore.instance
+          .collection('room')
+          .where('roomID', isEqualTo: data.roomID)
+          .snapshots()
+          .listen((value) {
+        value.docs.single.reference
+            .collection('listMessages')
+            .withConverter(
+                fromFirestore: Message.fromFirestore,
+                toFirestore: (value, options) => value.toFirestore())
+            .snapshots()
+            .listen((value) {
+          List<Message> result = value.docs.map((e) => e.data()).toList();
+          result.sort((a, b) => b.createdTime.compareTo(a.createdTime));
+          changeMessages(messages: result);
+        });
+      });
+      emit(state.copyWith(fetchDataStatus: LoadStatus.success));
+    } catch (e) {
+      emit(state.copyWith(fetchDataStatus: LoadStatus.failure));
+    }
+  }
+
+  void getMessages() {
     FirebaseFirestore.instance
         .collection('room')
-        .where('roomID', isEqualTo: data.roomID)
+        .where('roomID', isEqualTo: state.room!.roomID)
         .snapshots()
-        .listen((event) {
-      event.docs.single.reference
+        .listen((value) {
+      value.docs.single.reference
           .collection('listMessages')
           .withConverter(
               fromFirestore: Message.fromFirestore,
               toFirestore: (value, options) => value.toFirestore())
           .snapshots()
-          .listen((event) {
-        List<Message> result = event.docs.map((e) => e.data()).toList();
+          .listen((value) {
+        List<Message> result = value.docs.map((e) => e.data()).toList();
         result.sort((a, b) => b.createdTime.compareTo(a.createdTime));
         changeMessages(messages: result);
       });

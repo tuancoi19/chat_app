@@ -2,8 +2,6 @@ import 'package:chat_app/functions/database_functions.dart';
 import 'package:chat_app/ui/profile_account/profile_account_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../models/entities/users.dart';
-
 class ProfileAccountCubit extends Cubit<ProfileAccountState> {
   ProfileAccountCubit() : super(const ProfileAccountState());
 
@@ -19,7 +17,7 @@ class ProfileAccountCubit extends Cubit<ProfileAccountState> {
     emit(state.copyWith(lastName: lastname));
   }
 
-  void getData(String number) async {
+  Future<void> getData(String number) async {
     final data = await DatabaseFunctions().getUserProfile(number);
     if (data != null) {
       changeAvatar(avatar: data.avatarURL);

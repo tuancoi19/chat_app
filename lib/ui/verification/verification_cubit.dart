@@ -56,24 +56,7 @@ class SignInCubit extends Cubit<SignInState> {
   }
 
   void verifyOTP(BuildContext context, String verifyID, String otpPin) async {
-    await fireBaseAuth
-        .signInWithCredential(PhoneAuthProvider.credential(
-            verificationId: verifyID, smsCode: otpPin))
-        .then((value) async {
-      User? user = AuthRepository().getUser();
-      String number = user!.phoneNumber!;
-      appCubit.updateCurrentUser(number: number);
-      var check = await DatabaseFunctions().getUserProfile(number);
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-        if (check == null) {
-          return BlocProvider(
-              create: (context) => ProfileAccountCubit(),
-              child: const ProfileAccountScreen(isInSetting: false));
-        } else {
-          return const HomeScreen(pageIndex: 0);
-        }
-      }));
-    });
+    await fireBaseAuth.signInWithCredential(PhoneAuthProvider.credential(
+        verificationId: verifyID, smsCode: otpPin));
   }
 }

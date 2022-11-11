@@ -8,8 +8,6 @@ import 'package:chat_app/ui/personal_chat/personal_chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-
-import '../../../models/entities/rooms.dart';
 import '../../../models/entities/users.dart';
 
 class ContactsScreen extends StatefulWidget {
@@ -22,109 +20,121 @@ class ContactsScreen extends StatefulWidget {
 class _ContactsScreen extends State<ContactsScreen> {
   late ContactsCubit _cubit;
   late AppCubit appCubit;
-  TextEditingController controller = TextEditingController();
+  late TextEditingController controller;
+  late FocusNode focusNode;
 
   @override
   void initState() {
     super.initState();
+    controller = TextEditingController();
+    focusNode = FocusNode();
     appCubit = BlocProvider.of<AppCubit>(context);
     _cubit = BlocProvider.of<ContactsCubit>(context);
-    _cubit.getContacts(appCubit.state.userNumber!);
+    _cubit.getContacts(appCubit.state.user!.phoneNumber!);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ContactsCubit, ContactsState>(
-        bloc: _cubit,
-        builder: (BuildContext context, state) {
-          return Scaffold(
-              body: Container(
-                  margin: const EdgeInsets.only(top: 47),
-                  padding: const EdgeInsets.only(left: 24, right: 24),
-                  child: Column(children: [
-                    Container(
-                        padding: const EdgeInsets.only(bottom: 13),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Contacts',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 18,
-                                      color: text_color)),
-                              IconButton(
-                                  icon: Icon(Icons.add, color: text_color),
-                                  onPressed: null)
-                            ])),
-                    Container(
-                        margin: const EdgeInsets.only(top: 18),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: box_color),
-                        child: TextField(
-                          controller: controller,
-                          onChanged: (value) async {
-                            List<UserChat>? listSearch =
-                                await DatabaseFunctions()
-                                    .getAllUser(appCubit.state.userNumber!);
-                            List<UserChat> listResult;
-                            if (value.isEmpty) {
-                              _cubit.getContacts(appCubit.state.userNumber!);
-                              listResult = state.listContacts;
-                            } else {
-                              if (value[0] == '+') {
-                                listResult = listSearch!
-                                    .where((element) =>
-                                        element.phoneNumber.contains(value))
-                                    .toList();
+    return GestureDetector(
+      onTap: () => focusNode.unfocus(),
+      child: BlocBuilder<ContactsCubit, ContactsState>(
+          bloc: _cubit,
+          builder: (BuildContext context, state) {
+            return Scaffold(
+                body: Container(
+                    margin: const EdgeInsets.only(top: 47),
+                    padding: const EdgeInsets.only(left: 24, right: 24),
+                    child: Column(children: [
+                      Container(
+                          padding: const EdgeInsets.only(bottom: 13),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Contacts',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18,
+                                        color: textColor)),
+                                IconButton(
+                                    icon: Icon(Icons.add, color: textColor),
+                                    onPressed: null)
+                              ])),
+                      Container(
+                          margin: const EdgeInsets.only(top: 18),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: boxColor),
+                          child: TextField(
+                            controller: controller,
+                            onChanged: (value) async {
+                              List<UserChat>? listSearch =
+                                  await DatabaseFunctions().getAllUser(
+                                      appCubit.state.user!.phoneNumber!);
+                              List<UserChat> listResult;
+                              if (value.isEmpty) {
+                                _cubit.getContacts(
+                                    appCubit.state.user!.phoneNumber!);
+                                listResult = state.listContacts;
                               } else {
-                                listResult = listSearch!
-                                    .where((element) =>
-                                        ('${element.name.firstName} ${element.name.lastName}')
-                                            .toLowerCase()
-                                            .contains(value.toLowerCase()))
-                                    .toList();
+                                if (value[0] == '+') {
+                                  listResult = listSearch!
+                                      .where((element) =>
+                                          element.phoneNumber.contains(value))
+                                      .toList();
+                                } else {
+                                  listResult = listSearch!
+                                      .where((element) =>
+                                          ('${element.name.firstName} ${element.name.lastName}')
+                                              .toLowerCase()
+                                              .contains(value.toLowerCase()))
+                                      .toList();
+                                }
                               }
-                            }
-                            _cubit.changeListContacts(listContacts: listResult);
+                              _cubit.changeListContacts(
+                                  listContacts: listResult);
+                            },
+                            focusNode: focusNode,
+                            textInputAction: TextInputAction.search,
+                            maxLines: 1,
+                            decoration: InputDecoration(
+                                prefixIcon:
+                                    Icon(Icons.search, color: disableTextColor),
+                                border: InputBorder.none,
+                                hintText: 'Search',
+                                hintStyle: TextStyle(
+                                    color: disableTextColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14)),
+                          )),
+                      Expanded(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            return itemContact(state.listContacts[index]);
                           },
-                          textInputAction: TextInputAction.search,
-                          decoration: InputDecoration(
-                              prefixIcon:
-                                  Icon(Icons.search, color: disable_text_color),
-                              border: InputBorder.none,
-                              hintText: 'Search',
-                              hintStyle: TextStyle(
-                                  color: disable_text_color,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14)),
-                        )),
-                    Expanded(
-                      child: ListView.builder(
-                        itemBuilder: (context, index) {
-                          return itemContact(state.listContacts[index]);
-                        },
-                        itemCount: state.listContacts.length,
-                      ),
-                    )
-                  ])));
-        });
+                          itemCount: state.listContacts.length,
+                        ),
+                      )
+                    ])));
+          }),
+    );
   }
 
   Widget itemContact(UserChat? item) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => BlocProvider(
-                      create: (context) => PersonalChatCubit(),
-                      child: PersonalChatScreen(guest: item),
-                    )));
+          context,
+          MaterialPageRoute(
+            builder: (context) => BlocProvider(
+              create: (context) => PersonalChatCubit(),
+              child: PersonalChatScreen(guest: item),
+            ),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: disable_text_color))),
+            border: Border(bottom: BorderSide(color: disableTextColor))),
         width: 327,
         height: 68,
         margin: const EdgeInsets.only(top: 16),
@@ -152,7 +162,7 @@ class _ContactsScreen extends State<ContactsScreen> {
                   height: 48,
                   width: 48,
                   decoration: BoxDecoration(
-                    color: box_color,
+                    color: boxColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
@@ -170,7 +180,7 @@ class _ContactsScreen extends State<ContactsScreen> {
                       height: 14,
                       width: 14,
                       margin: const EdgeInsets.only(
-                          top: 2, left: 38, right: 2, bottom: 38),
+                          left: 38, bottom: 38, right: 2, top: 2),
                       decoration: BoxDecoration(
                           border: Border.all(width: 2, color: Colors.white),
                           borderRadius: BorderRadius.circular(90),
@@ -191,7 +201,7 @@ class _ContactsScreen extends State<ContactsScreen> {
                         style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
-                            color: text_color)),
+                            color: textColor)),
                   ),
                   Container(
                     alignment: Alignment.centerLeft,
@@ -200,7 +210,7 @@ class _ContactsScreen extends State<ContactsScreen> {
                       style: TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: 12,
-                          color: disable_text_color),
+                          color: disableTextColor),
                     ),
                   ),
                   const SizedBox(height: 10)

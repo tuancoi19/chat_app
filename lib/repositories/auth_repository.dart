@@ -7,7 +7,7 @@ class AuthRepository {
       : fireBaseAuth = fireBaseAuth ?? FirebaseAuth.instance;
 
   Future<void> signOut() async {
-    await fireBaseAuth.signOut();
+    return await fireBaseAuth.signOut();
   }
 
   bool isSignIn() {
